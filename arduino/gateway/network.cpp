@@ -68,6 +68,15 @@ void radioon() {
     delay(10000);
   }
 
+  RH_RF95::ModemConfig modemconfig = {
+    // see pg 106 http://www.hoperf.com/upload/rf/RFM95_96_97_98W.pdf
+    0x76, // reg 1D - 125kHz, 4/7
+    0xc4, // reg 1E - SF=12, CRC on
+    0x0c  // reg 26 - low data rate on, AGC on
+  };
+
+  rf95.setModemRegisters(&modemconfig);
+
   // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
   if (!rf95.setFrequency(RF95_FREQ)) {
     Serial.println("# setFrequency failed");
@@ -75,8 +84,6 @@ void radioon() {
   } else {
     Serial.print("# Set Freq to: "); Serial.println(RF95_FREQ);
   }
-
-  // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
 
   // The default transmitter power is 13dBm, using PA_BOOST.
   // If you are using RFM95/96/97/98 modules which uses the PA_BOOST transmitter pin, then
@@ -177,7 +184,7 @@ bool digipeat(uint8_t *pkt, int rssi) {
 
 // transmits all the packets in the xmit stack, while receiving any that come in
 void xmitstack() {
-  int delaytime = random(MAX_XMIT_WAIT) + 10000; // add 10 seconds to prevent simple_gateway from throwing packets away
+  int delaytime = random(MAX_XMIT_WAIT) + 2000; // add 2 seconds in case another packet is on its way
   bool delayed = false;
   while (xmitbufi > -1) {
     if (!delayed && xmitbuf[xmitbufi].delay) {

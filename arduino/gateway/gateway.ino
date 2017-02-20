@@ -59,12 +59,12 @@ void loop() {
   switch(mode) {
     case MODE_OFF:
       sleepreset(0);
-      if(voltage() < MIN_XMIT_VOLTAGE) {
+      if(BATTERY_SAVING && voltage() < MIN_XMIT_VOLTAGE) {
         radiooff();
         mode = MODE_LOWBATT;
       } else {
         radioon();
-        if(voltage() > RADIO_CONTINUOUS_VOLTAGE) {
+        if(!BATTERY_SAVING || voltage() > RADIO_CONTINUOUS_VOLTAGE) {
           beacon("Powered on!");
           xmitstack();
           mode = MODE_CONTINUOUS;
@@ -77,7 +77,7 @@ void loop() {
       }
       break;
     case MODE_CONTINUOUS:
-      if(voltage() < MIN_XMIT_VOLTAGE) {
+      if(BATTERY_SAVING && voltage() < MIN_XMIT_VOLTAGE) {
         beacon("Entering transmit only mode.");
         xmitstack();
         radiooff();
